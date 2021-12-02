@@ -2,13 +2,24 @@
 
 import Foundation
 
-func day06() {
-  let dayNum = 6
+func day06(testData: [String], realData: [String]) {
+  let expectedTestResults = [1, 2]
+  let testResults = runCode(data: testData)
+  if testResults != expectedTestResults {
+    print("Error running tests")
+    print("Expected:", expectedTestResults)
+    print("Got:", testResults)
+    return
+  } else {
+    print("Tests passed")
+    print()
+  }
 
-  let data = openTestFile(dayNum: dayNum, separator: "\n")
-  // let data = openDataFile(dayNum: dayNum, separator: "\n")
+  let realResults = runCode(data: realData)
+  print("Results:", realResults)
 
-  print("Part 1: \(1)")
+  func runCode(data: [String]) -> [Int] {
 
-  print("Part 2: \(2)")
+    return [1, 2]
+  }
 }
