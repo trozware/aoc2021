@@ -4,7 +4,7 @@ import Foundation
 
 func day02() {
   let dayNum = 2
-
+  
   let data = openTestFile(dayNum: dayNum, separator: "\n")
   // let data = openDataFile(dayNum: dayNum, separator: "\n")
 

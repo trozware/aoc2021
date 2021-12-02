@@ -2,7 +2,7 @@
 
 import Foundation
 
-let dayNum = 2
+let dayNum = 1
 
 let startTime = Date()
 
