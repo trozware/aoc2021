@@ -51,7 +51,18 @@ func showElapsedTime(from startTime: Date, to endTime: Date) {
   print("\nTime taken: \(timeString) milliseconds")
 }
 
-extension String {
+func substring(of str: String, from: Int, upto: Int) -> String {
+  var end = upto
+  if end < 0 {
+    end = str.count + end
+  }
+  let removeStart = str
+    .suffix(str.count - from)
+    .prefix(end - from)
+  return String(removeStart)
+}
+
+public extension String {
   subscript(index: Int) -> String {
     var index = index
     if index > count { return "" }
@@ -61,17 +72,6 @@ extension String {
 
     let stringIndex = self.index(self.startIndex, offsetBy: index)
     return String(self[stringIndex])
-  }
-
-  subscript(from: Int, upto: Int) -> String {
-    var end = upto
-    if end < 0 {
-      end = self.count + end
-    }
-    let removeStart = self
-      .suffix(self.count - from)
-      .prefix(end - from)
-    return String(removeStart)
   }
 
   func padLeft(to length: Int, with spacer: String = " ") -> String {
