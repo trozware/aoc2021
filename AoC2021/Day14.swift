@@ -21,6 +21,7 @@ func day14(testData: [String], realData: [String]) {
 
   func runCode(data: [String]) -> [Int] {
     var polymer = data[0].map { String($0) }
+    let storedPolymer = polymer
 
     var rules: [String: String] = [:]
     for index in 2 ..< data.count {
@@ -50,30 +51,66 @@ func day14(testData: [String], realData: [String]) {
     let result1 = maxCount - minCount
     print("Result 1:", result1)
 
-    
+    polymer = storedPolymer
 
-//    for i in 10 ..< 20 {
-//      // print("Loop", i + 1)
-//
-//      var additions: [String] = []
-//
-//      for index in 0 ..< polymer.count - 1 {
-//        let pair = polymer[index] + polymer[index + 1]
-//        let insertion = rules[pair]!
-//        additions.append(insertion)
-//      }
-//
-//      let combined = zip(polymer, additions).flatMap{ [$0.0, $0.1] }
-//      polymer = combined + [polymer.last!]
-//      // print(polymer.count)
-//
-//    }
-//
-//    let (maxCount2, minCount2) = countElements(polymer: polymer)
-//    let result2 = maxCount2 - minCount2
-//    print("Result 2:", result2)
+    var pairCounts: [String: Int] = [:]
+    for index in 0 ..< polymer.count - 1 {
+      let pair = polymer[index] + polymer[index + 1]
+      if pairCounts[pair] != nil {
+        pairCounts[pair]! += 1
+      } else {
+        pairCounts[pair] = 1
+      }
+    }
 
-    return [result1, 3]
+    for _ in 0 ..< 40 {
+      var newCounts: [String: Int] = [:]
+      for (pair, count) in pairCounts {
+        let insertion = rules[pair]!
+        let newPair1 = pair[0] + insertion
+        let newPair2 = insertion + pair[1]
+        if newCounts[newPair1] != nil {
+          newCounts[newPair1]! += count
+        } else {
+          newCounts[newPair1] = count
+        }
+        if newCounts[newPair2] != nil {
+          newCounts[newPair2]! += count
+        } else {
+          newCounts[newPair2] = count
+        }
+      }
+      pairCounts = newCounts
+    }
+
+    var counts: [String: Int] = [:]
+    for (pair, count) in pairCounts {
+      if counts[pair[0]] != nil {
+        counts[pair[0]]! += count
+      } else {
+        counts[pair[0]] = count
+      }
+      if counts[pair[1]] != nil {
+        counts[pair[1]]! += count
+      } else {
+        counts[pair[1]] = count
+      }
+    }
+
+    for (letter, count) in counts {
+      counts[letter] = count / 2
+      if letter == storedPolymer.first {
+        counts[letter]! += 1
+      } else if letter == storedPolymer.last {
+        counts[letter]! += 1
+      }
+    }
+
+    let (maxC, minC) = findMaxMin(counts: counts)
+    let result2 = maxC - minC
+    print("Result 2:", result2)
+
+    return [result1, result2]
   }
 
   func countElements(polymer: [String]) -> (Int, Int) {
@@ -86,8 +123,11 @@ func day14(testData: [String], realData: [String]) {
         counts[p]! += 1
       }
     }
-//    print(counts)
 
+    return findMaxMin(counts: counts)
+  }
+
+  func findMaxMin(counts: [String: Int]) -> (Int, Int) {
     var maxCount = 0
     var minCount = Int.max
 
@@ -103,5 +143,3 @@ func day14(testData: [String], realData: [String]) {
     return (maxCount, minCount)
   }
 }
-
-// test - always H & B, detected after 2 rounds

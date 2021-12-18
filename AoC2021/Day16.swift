@@ -66,7 +66,7 @@ func day16(testData: [String], realData: [String]) {
   }
 
   func decodeOperator(_ data: [String]) -> Int {
-    var value = ""
+    // var value = ""
     var index = 0
 
     let lengthBit = data[index]
