@@ -2,7 +2,7 @@
 
 import Foundation
 
-let dayNum = 15
+let dayNum = 14
 
 print("Running program for day \(dayNum):")
 print()
