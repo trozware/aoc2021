@@ -34,7 +34,9 @@ func day15(testData: [String], realData: [String]) {
 
     var endPointId = points.first { $0.row == data[0].count - 1 && $0.col == data.count - 1 }!.id
     let lowestCost = findPathCost(points: points, endPointId: endPointId)
-    // 740 is too high - 739 is right ???
+    // 739
+
+    // Part 2 - takes about 17 hours
 
     let bigCave = expandCave(data: data)
 
@@ -60,34 +62,43 @@ func day15(testData: [String], realData: [String]) {
     let startPoint = points.first { $0.row == 0 && $0.col == 0 }!
     startPoint.pathCost = 0
 
-    var queue = [startPoint]
+    var queue = points
     var lowestCost = Int.max
+    var next = startPoint
+    var costAssigned: [Point15] = []
 
+  outerloop:
     while !queue.isEmpty {
-      let next = queue.first!
-      queue = Array(queue.dropFirst())
+      // queue = Array(queue.dropFirst())
+      let index = queue.firstIndex(of: next)!
+      queue.remove(at: index)
 
-      let nextPoints = assignNeighbors(point: next, allPoints: points)
+      let nextPoints = assignNeighbors(point: next, allPoints: queue)
+
       for p in nextPoints {
         let newPathCost = p.cost + next.pathCost
         if newPathCost < p.pathCost {
           p.pathCost = newPathCost
+          costAssigned.append(p)
 
-          if p.id != endPointId {
-            if !queue.contains(where: { $0 == p }) {
-              queue.append(p)
-            }
-          } else {
-            if p.pathCost < lowestCost {
-              lowestCost = p.pathCost
-            }
+          if p.id == endPointId {
+            lowestCost = p.pathCost
             print(p)
+            break outerloop
           }
         }
       }
-      queue.sort { a, b in
+
+      //      queue.sort { a, b in
+      //        a.pathCost < b.pathCost
+      //      }
+
+      // find next point to check
+      costAssigned.sort { a, b in
         a.pathCost < b.pathCost
       }
+      next = costAssigned.first!
+      costAssigned = Array(costAssigned.dropFirst())
     }
 
     return lowestCost
@@ -98,11 +109,19 @@ func day15(testData: [String], realData: [String]) {
       $0.row == point.row + 1 && $0.col == point.col
     }
 
+    let pointAbove = allPoints.first {
+      $0.row == point.row - 1 && $0.col == point.col
+    }
+
     let pointRight = allPoints.first {
       $0.row == point.row && $0.col == point.col + 1
     }
 
-    let neighbours = [pointBelow, pointRight].compactMap { $0 }
+    let pointLeft = allPoints.first {
+      $0.row == point.row && $0.col == point.col - 1
+    }
+
+    let neighbours = [pointBelow, pointAbove, pointRight, pointLeft].compactMap { $0 }
     return neighbours
   }
 
