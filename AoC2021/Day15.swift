@@ -3,7 +3,7 @@
 import Foundation
 
 func day15(testData: [String], realData: [String]) {
-  let expectedTestResults = [40, 2]
+  let expectedTestResults = [40, 315]
 
   let testResults = runCode(data: testData)
   if testResults != expectedTestResults {
@@ -30,102 +30,73 @@ func day15(testData: [String], realData: [String]) {
       }
     }
 
-    var neighbors: [String: [Point15]] = [:]
-    for point in points {
-      let nexts = assignNeighbors(point: point, allPoints: points)
-      neighbors[point.id] = nexts
+    // Part 1
+
+    var endPointId = points.first { $0.row == data[0].count - 1 && $0.col == data.count - 1 }!.id
+    let lowestCost = findPathCost(points: points, endPointId: endPointId)
+    // 740 is too high - 739 is right ???
+
+    let bigCave = expandCave(data: data)
+
+    points = []
+
+    for rowNum in 0 ..< bigCave.count {
+      for colNum in 0 ..< bigCave[0].count {
+        let cost = bigCave[rowNum][colNum]
+        let newPoint = Point15(id: "\(rowNum),\(colNum)", row: rowNum, col: colNum, cost: cost)
+        points.append(newPoint)
+      }
     }
 
-//
-//    var newPoints: [Point15] = []
-//    for index in 0 ..< points.count {
-//      var newPoint = points[index]
-//      newPoint.neighbors = assignNeighbors(point: points[index], allPoints: points)
-//      newPoints.append(newPoint)
-//    }
-//    points = newPoints
+    endPointId = points.first { $0.row == bigCave[0].count - 1 && $0.col == bigCave.count - 1 }!.id
+    let lowestCost2 = findPathCost(points: points, endPointId: endPointId)
 
-    let startPoint = points.first { $0.row == 0 && $0.col == 0 }!
-    let endPoint = points.first { $0.row == data[0].count - 1 && $0.col == data.count - 1 }!
+    // 3043 too high, 3042 too high
 
-//    print(startPoint)
-//    print(endPoint)
-//    print()
-//    for p in points {
-//      print(p)
-//    }
-
-    var partialPaths = [[startPoint]]
-    var completePaths: [[Point15]] = []
-
-    while !partialPaths.isEmpty {
-      let path = partialPaths[0]
-      partialPaths = Array(partialPaths.dropFirst())
-
-      let lastPoint = path.last!
-      let nexts = neighbors[lastPoint.id]!
-      let nextPaths = nexts.map { path + [$0] }
-      var minCost = Int.max
-      var minPath: [Point15]? = nil
-      for next in nextPaths {
-        let cost = costOfPath(next)
-        if cost < minCost {
-          minCost = cost
-          minPath = next
-        }
-      }
-      if let minPath = minPath {
-        if minPath.last! == endPoint {
-          completePaths.append(minPath)
-          print("complete", completePaths.count)
-        } else {
-          partialPaths.append(minPath)
-          print("partial", partialPaths.count)
-        }
-      }
-
-//      for n in neighbors[lastPoint.id]! {
-//        let newPath = path + [n]
-//        if n == endPoint {
-//          completePaths.append(newPath)
-//          print("complete", completePaths.count)
-//        } else if !path.contains(n) {
-//          // printPath(newPath)
-//          partialPaths.append(newPath)
-//          print("partial", partialPaths.count)
-//        }
-//      }
-    }
-
-    print(completePaths.count)
-    printPath(completePaths[0])
-
-
-    let risks = completePaths.map { costOfPath($0) }
-    let lowestRisk = risks.min()! - startPoint.cost
-
-    print(lowestRisk)
-
-    return [1, 2]
+    return [lowestCost, lowestCost2]
   }
 
-  func printPath(_ path: [Point15]) {
-    let ids = path.map { $0.id }
-    print(ids.joined(separator: " - "))
+  func findPathCost(points: [Point15], endPointId: String) -> Int {
+    let startPoint = points.first { $0.row == 0 && $0.col == 0 }!
+    startPoint.pathCost = 0
+
+    var queue = [startPoint]
+    var lowestCost = Int.max
+
+    while !queue.isEmpty {
+      let next = queue.first!
+      queue = Array(queue.dropFirst())
+
+      let nextPoints = assignNeighbors(point: next, allPoints: points)
+      for p in nextPoints {
+        let newPathCost = p.cost + next.pathCost
+        if newPathCost < p.pathCost {
+          p.pathCost = newPathCost
+
+          if p.id != endPointId {
+            if !queue.contains(where: { $0 == p }) {
+              queue.append(p)
+            }
+          } else {
+            if p.pathCost < lowestCost {
+              lowestCost = p.pathCost
+            }
+            print(p)
+          }
+        }
+      }
+      queue.sort { a, b in
+        a.pathCost < b.pathCost
+      }
+    }
+
+    return lowestCost
   }
 
   func assignNeighbors(point: Point15, allPoints: [Point15]) -> [Point15] {
-//    let pointAbove = allPoints.first {
-//      $0.row == point.row - 1 && $0.col == point.col
-//    }
-
     let pointBelow = allPoints.first {
       $0.row == point.row + 1 && $0.col == point.col
     }
-
-//    let pointLeft = allPoints.first {
-//      $0.row == point.row && $0.col == point.col - 1
-//    }
 
     let pointRight = allPoints.first {
       $0.row == point.row && $0.col == point.col + 1
@@ -135,23 +106,72 @@ func day15(testData: [String], realData: [String]) {
     return neighbours
   }
 
-  func costOfPath(_ path: [Point15]) -> Int {
-    let totalCost = path.reduce(0) { (cumulativeTotal, nextPoint) in
-      return cumulativeTotal + nextPoint.cost
+  func expandCave(data: [String]) -> [[Int]] {
+    var points: [[Int]] = []
+    let rowWidth = data[0].count
+
+    for rowNum in 0 ..< data.count {
+      points.append([])
+      for colNum in 0 ..< rowWidth {
+        let cost = Int(data[rowNum][colNum])!
+        points[rowNum].append(cost)
+      }
     }
-    return totalCost
+
+    for _ in 1 ..< 5 {
+      for rowNum in 0 ..< points.count {
+        let rowStart = Array(points[rowNum].suffix(rowWidth))
+        let rowData = rowStart.map { cost -> Int in
+          var newCost = cost + 1
+          if newCost > 9 { newCost = 1 }
+          return newCost
+        }
+        points[rowNum] += rowData
+      }
+    }
+
+    let requiredRows = points.count * 5
+    var startRow = 0
+
+    while points.count < requiredRows {
+      let starter = points[startRow]
+      let rowData = starter.map { cost -> Int in
+        var newCost = cost + 1
+        if newCost > 9 { newCost = 1 }
+        return newCost
+      }
+      points.append(rowData)
+      startRow += 1
+    }
+
+    return points
   }
 }
 
-struct Point15: CustomStringConvertible, Equatable {
+class Point15: CustomStringConvertible, Identifiable, Hashable, Equatable {
   let id: String
   let row: Int
   let col: Int
-  let cost: Int
-//  var neighbors: [Point15] = []
+  var cost: Int
+  var pathCost: Int
+
+  init(id: String, row: Int, col: Int, cost: Int, pathCost: Int = Int.max) {
+    self.id = id
+    self.row = row
+    self.col = col
+    self.cost = cost
+    self.pathCost = pathCost
+  }
 
   var description: String {
-    return "row: \(row), col: \(col), cost: \(cost)"
-    //, neighbors: \(neighbors.count)"
+    return "\nrow: \(row), col: \(col), cost: \(cost), path cost: \(pathCost)"
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
+  }
+
+  static func == (lhs: Point15, rhs: Point15)  -> Bool {
+    lhs.id == rhs.id
   }
 }
