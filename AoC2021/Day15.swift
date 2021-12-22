@@ -53,7 +53,7 @@ func day15(testData: [String], realData: [String]) {
     endPointId = points.first { $0.row == bigCave[0].count - 1 && $0.col == bigCave.count - 1 }!.id
     let lowestCost2 = findPathCost(points: points, endPointId: endPointId)
 
-    // 3043 too high, 3042 too high
+    // Answer = 3040 - got using Python
 
     return [lowestCost, lowestCost2]
   }
