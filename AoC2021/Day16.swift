@@ -84,14 +84,14 @@ func day16(testData: [String], realData: [String]) {
 
     // Part 2
 
-    let result = analysePackets(packets, allPackets: packets)
+    let result = analysePackets(packets)
     print(result)
     print("\nResult:", result)
 
     return [versionsCounter, result]
   }
 
-  func analysePackets(_ packets: [Packet], allPackets: [Packet], operatorType: Int? = nil) -> Int {
+  func analysePackets(_ packets: [Packet], operatorType: Int? = nil) -> Int {
     var result = 0
 
     var nums: [Int] = []
@@ -106,23 +106,20 @@ func day16(testData: [String], realData: [String]) {
       if let value = pack.value {
         nums.append(value)
       } else if let count = pack.packetCount {
-        let startingIndex = allPackets.firstIndex { $0.pointer == pack.pointer }!
-        let subPackets = Array(allPackets[startingIndex + 1 ..< startingIndex + 1 + count])
+        let subPackets = Array(packets[startPack ..< startPack + count])
         startPack += count
         //print("startPack = ", startPack, "packets count = ", packets.count)
-        nums.append(analysePackets(subPackets, allPackets: allPackets, operatorType: pack.type))
+        nums.append(analysePackets(subPackets, operatorType: pack.type))
       } else if let len = pack.packetLength {
         var subPackets: [Packet] = []
         var totalLen = 0
-        var startingIndex = allPackets.firstIndex { $0.pointer == pack.pointer }!
         while totalLen < len {
-          subPackets.append(allPackets[startingIndex + 1])
-          totalLen += allPackets[startingIndex + 1].len
+          subPackets.append(packets[startPack])
+          totalLen += packets[startPack].len
           startPack += 1
-          startingIndex += 1
         }
         //print("startPack = ", startPack, "packets count = ", packets.count)
-        nums.append(analysePackets(subPackets, allPackets: allPackets, operatorType: pack.type))
+        nums.append(analysePackets(subPackets, operatorType: pack.type))
       }
     }
 
