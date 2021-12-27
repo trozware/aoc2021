@@ -167,6 +167,8 @@
 			dependencies = (
 			);
 			name = AoC2020;
+			packageProductDependencies = (
+			);
 			productName = AoCTester;
 			productReference = 26D0C024259FF24400FFBA4F /* AoC2020 */;
 			productType = "com.apple.product-type.tool";
@@ -194,6 +196,8 @@
 				Base,
 			);
 			mainGroup = 26D0C01B259FF24400FFBA4F;
+			packageReferences = (
+			);
 			productRefGroup = 26D0C025259FF24400FFBA4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";

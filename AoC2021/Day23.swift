@@ -20,6 +20,10 @@ func day23(testData: [String], realData: [String]) {
 
   func runCode(data: [String]) -> [Int] {
 
+    // Part 1 done manually: 15237
+
+    // Part 2 done manually: 47509
+
     return [1, 2]
   }
 }
