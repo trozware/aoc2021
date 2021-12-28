@@ -91,7 +91,7 @@ func day24(testData: [String], realData: [String]) {
       print(alu)
       break
 
-      inputNum -= change
+//      inputNum -= change
     }
 
     return [2, 2]
